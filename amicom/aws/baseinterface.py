@@ -8,4 +8,4 @@ class BaseInterface(object):
     output_extention = '.mp4'
     input_dir = 'original/'
     output_dir = 'transcode/'
-    bucket_name = 'ezeztranstest'
+    bucket_name = 'brainbridgetranscoder'

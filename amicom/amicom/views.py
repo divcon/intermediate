@@ -13,14 +13,18 @@ from aws.transinterface import TransCoder
 
 
 def transcoding(origin_filename):
+    print "transcoding start"
     s3 = S3Interface()
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     filename = origin_filename.split('.')[0]
-    s3.upload(base_dir+"/media/", filename)
+    print "upload : " + filename
+    s3.upload(MEDIA_ROOT, filename)
+    print "transcoding ...."
     transcoder = TransCoder()
     transcoder.transcode(filename)
-    s3.download(base_dir+"/media/", filename)
-    return HttpResponse()
+    print "download : " + filename
+    s3.download(MEDIA_ROOT, filename)
+    print "complete transcoding"
 
 
 @csrf_exempt

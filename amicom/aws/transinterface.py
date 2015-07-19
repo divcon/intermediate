@@ -14,7 +14,7 @@ class TransCoder(BaseInterface):
     def __init__(self):
         self.aws_transcoder = boto.connect_elastictranscoder(AuthentiCation.access_key, AuthentiCation.secret_key,)
         self.aws_transcoder = boto.elastictranscoder.connect_to_region('ap-northeast-1')
-        self.pipeline_id = '1437061225301-3fp8ix'
+        self.pipeline_id = '1437294072599-2bekkw'
         self.presetId = '1351620000001-000020'
 
     def transcode(self, file_name):
