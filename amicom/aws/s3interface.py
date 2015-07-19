@@ -22,4 +22,9 @@ class S3Interface(BaseInterface):
 
     def download(self, des_dir, file_name):
         key = self.bucket.get_key(self.output_dir+file_name+self.output_extention)
+        while key is None:
+            time.sleep(2)
+            print "key : Null"
+            key = self.bucket.get_key(self.output_dir+file_name+self.output_extention)
+        print "key : not null"
         key.get_contents_to_filename(des_dir+file_name+self.output_extention)

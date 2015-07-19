@@ -32,3 +32,6 @@ else
 fi
 
 exit 0
+
+
+curl -H "Cookie: _trackvue_session=`cat cookie`" --form "track[driver_id]=2" --form "track[start_time]=2014-12-25 08:44:00 GMT+0900" --form "track[end_time]=2014-12-25 08:48:00 GMT+0900" --form "track[speed]=60" --form "track[speed_max]=52" --form "track[speed_avg]=32" --form "track[status]=R" --form "track[from_lat]=37.882" --form "track[from_lng]=127.083" --form "track[to_lat]=37.887" --form "track[to_lng]=127.0859" --form "track[elapsed]=240" --form "track[distance]=7.1" --form "track[count_off]=0" --form "track[count_idle]=1" --form "track[count_slow]=0" --form "track[count_normal]=5" --form "track[count_fast]=0" --form "track[count_speeding]=0" --form "track[front_img]=@./front02.jpeg;type=image/jpeg"  --form "track[rear_img]=@./rear02.jpeg;type=image/jpeg" --form "track[video]=@./video.mp4;type=video/mp4" http://104.236.113.238/tracks.json

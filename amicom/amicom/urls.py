@@ -21,7 +21,7 @@ from . import views
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    # url(r'^test', views.test, name='index'),
+    url(r'^test', views.test, name='index'),
     url(r'^signin', views.signin, name='signin'),
     url(r'^alerts.json', views.fleet_event, name='signin'),
     url(r'^tracks.json', views.fleet_track1, name='signin'),

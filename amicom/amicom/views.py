@@ -44,13 +44,27 @@ def fleet_event(request):
     import os
     if request.method == 'POST':
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        filename = MEDIA_ROOT+'/'+request.FILES['alert[video]'].name
+        video_filename = MEDIA_ROOT+'/'+request.FILES['alert[video]'].name
         file_content = ContentFile(request.FILES['alert[video]'].read())
-        with open(filename, "wb") as fp:
+        with open(video_filename, "wb") as fp:
             for chunk in file_content.chunks():
                 fp.write(chunk)
-        filename_without_path = request.FILES['alert[video]'].name
-        transcoding(filename_without_path)
+        mp4_file_name = video_filename.split('.')[0]+'.mp4'
+        video_filename_without_path = request.FILES['alert[video]'].name
+        transcoding(video_filename_without_path)
+
+        front_image_filename = MEDIA_ROOT+'/'+request.FILES['alert[front_img]'].name
+        file_content = ContentFile(request.FILES['alert[front_img]'].read())
+        with open(front_image_filename, "wb") as fp:
+            for chunk in file_content.chunks():
+                fp.write(chunk)
+
+        rear_image_filename = MEDIA_ROOT+'/'+request.FILES['alert[rear_img]'].name
+        file_content = ContentFile(request.FILES['alert[rear_img]'].read())
+        with open(rear_image_filename, "wb") as fp:
+            for chunk in file_content.chunks():
+                fp.write(chunk)
+
         result_file_path = base_dir+'/event_result'
         os.system("rm -rf "+result_file_path)
         cmd = 'curl -v -H "Cookie: _trackvue_session=' + request.POST['cookie'] + '"' + \
@@ -60,9 +74,11 @@ def fleet_event(request):
               ' --form "alert[alert_type]=' + request.POST['alert[alert_type]'] + '"' + \
               ' --form "alert[severity]=' + request.POST['alert[severity]'] + '"' + \
               ' --form "alert[value]=' + request.POST['alert[value]'] + '"' + \
-              ' --form "alert[lat]=' + request.POST['alert[lat]'] +'"' + \
-              ' --form "alert[lng]=' + request.POST['alert[lng]'] +'"' + \
-              ' --form "alert[video]=@'+filename+';type=video/avi" ' + \
+              ' --form "alert[lat]=' + request.POST['alert[lat]'] + '"' + \
+              ' --form "alert[lng]=' + request.POST['alert[lng]'] + '"' + \
+              ' --form "alert[video]=@' + mp4_file_name + ';type=video/mp4" ' + \
+              ' --form "alert[front_img]=@' + front_image_filename + ';type=image/jpeg" ' + \
+              '--form "alert[rear_img]=@' + front_image_filename + ';type=image/jpeg" ' + \
               'http://104.236.199.54/alerts.json >> ' + result_file_path
         os.system(cmd)
         result_file = open(result_file_path)
@@ -78,6 +94,26 @@ def fleet_track1(request):
     if request.method == 'POST':
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         result_file_path = base_dir+'/track1_result'
+        # video_filename = MEDIA_ROOT+'/'+request.FILES['track[video]'].name
+        # file_content = ContentFile(request.FILES['track[video]'].read())
+        # with open(video_filename, "wb") as fp:
+        #     for chunk in file_content.chunks():
+        #         fp.write(chunk)
+        # mp4_file_name = video_filename.split('.')[0]+'.mp4'
+        # video_filename_without_path = request.FILES['track[video]'].name
+        # transcoding(video_filename_without_path)
+        #
+        # front_image_filename = MEDIA_ROOT+'/'+request.FILES['track[front_img]'].name
+        # file_content = ContentFile(request.FILES['track[front_img]'].read())
+        # with open(front_image_filename, "wb") as fp:
+        #     for chunk in file_content.chunks():
+        #         fp.write(chunk)
+        #
+        # rear_image_filename = MEDIA_ROOT+'/'+request.FILES['track[rear_img]'].name
+        # file_content = ContentFile(request.FILES['track[rear_img]'].read())
+        # with open(rear_image_filename, "wb") as fp:
+        #     for chunk in file_content.chunks():
+        #         fp.write(chunk)
         cmd = 'curl -H "Cookie: _trackvue_session=' + request.POST['cookie'] + '"' + \
               ' --form "track[driver_id]=' + request.POST['track[driver_id]'] + '"' + \
               ' --form "track[start_time]=' + request.POST['track[start_time]'] + '"' + \
@@ -99,10 +135,24 @@ def fleet_track1(request):
               ' --form "track[count_fast]=' + request.POST['track[count_fast]'] + '"' + \
               ' --form "track[count_speeding]=' + request.POST['track[count_speeding]'] + '"' + \
               ' http://104.236.199.54/tracks.json >> ' + result_file_path
+              # ' --form "track[video]=@' + mp4_file_name + ';type=video/mp4" ' + \
+              # ' --form "track[front_img]=@' + front_image_filename + ';type=image/jpeg" ' + \
+              # ' --form "track[rear_img]=@' + front_image_filename + ';type=image/jpeg" ' + \
+              # ' http://104.236.199.54/tracks.json >> ' + result_file_path
         os.system(cmd)
+        # os.system('curl --form "track[video]=@' + mp4_file_name + ';type=video/mp4" http://localhost:8000/test')
         result_file = open(result_file_path)
         data = result_file.readlines()
         result_file.close()
         os.system("rm -rf "+result_file_path)
         return HttpResponse(data)
 
+
+@csrf_exempt
+def test(request):
+    video_filename = MEDIA_ROOT+'/'+'121212'+request.FILES['track[video]'].name
+    file_content = ContentFile(request.FILES['track[video]'].read())
+    with open(video_filename, "wb") as fp:
+        for chunk in file_content.chunks():
+            fp.write(chunk)
+    return HttpResponse()

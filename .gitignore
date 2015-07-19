@@ -1,0 +1,3 @@
+*.pyc
+amicom/media/*.*
+amicom/.idea/*.*
