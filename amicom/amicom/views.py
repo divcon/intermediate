@@ -57,17 +57,18 @@ def fleet_event(request):
         video_filename_without_path = request.FILES['alert[video]'].name
         transcoding(video_filename_without_path)
 
-        front_image_filename = MEDIA_ROOT+'/'+request.FILES['alert[front_img]'].name
-        file_content = ContentFile(request.FILES['alert[front_img]'].read())
-        with open(front_image_filename, "wb") as fp:
-            for chunk in file_content.chunks():
-                fp.write(chunk)
-
-        rear_image_filename = MEDIA_ROOT+'/'+request.FILES['alert[rear_img]'].name
-        file_content = ContentFile(request.FILES['alert[rear_img]'].read())
-        with open(rear_image_filename, "wb") as fp:
-            for chunk in file_content.chunks():
-                fp.write(chunk)
+        # front_image_filename = MEDIA_ROOT+'/'+request.FILES['alert[front_img]'].name
+        # file_content = ContentFile(request.FILES['alert[front_img]'].read())
+        # with open(front_image_filename, "wb") as fp:
+        #     for chunk in file_content.chunks():
+        #         fp.write(chunk)
+        # print "file size : " + str(fp.__sizeof__())
+        #
+        # rear_image_filename = MEDIA_ROOT+'/'+request.FILES['alert[rear_img]'].name
+        # file_content = ContentFile(request.FILES['alert[rear_img]'].read())
+        # with open(rear_image_filename, "wb") as fp:
+        #     for chunk in file_content.chunks():
+        #         fp.write(chunk)
 
         result_file_path = base_dir+'/event_result'
         os.system("rm -rf "+result_file_path)
@@ -81,9 +82,10 @@ def fleet_event(request):
               ' --form "alert[lat]=' + request.POST['alert[lat]'] + '"' + \
               ' --form "alert[lng]=' + request.POST['alert[lng]'] + '"' + \
               ' --form "alert[video]=@' + mp4_file_name + ';type=video/mp4" ' + \
-              ' --form "alert[front_img]=@' + front_image_filename + ';type=image/jpeg" ' + \
-              '--form "alert[rear_img]=@' + front_image_filename + ';type=image/jpeg" ' + \
               'http://104.236.199.54/alerts.json >> ' + result_file_path
+              # ' --form "alert[front_img]=@' + front_image_filename + ';type=image/jpeg" ' + \
+              # '--form "alert[rear_img]=@' + front_image_filename + ';type=image/jpeg" ' + \
+              # 'http://104.236.199.54/alerts.json >> ' + result_file_path
         os.system(cmd)
         result_file = open(result_file_path)
         data = result_file.readlines()
