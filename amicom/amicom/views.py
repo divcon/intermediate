@@ -57,7 +57,8 @@ def fleet_event(request):
         video_filename_without_path = request.FILES['alert[video]'].name
         transcoding(video_filename_without_path)
 
-        result_file_path = base_dir+'/event_result'
+        result_file_path = base_dir+'/event_result'+(request.FILES['alert[video]'].name.split('.')[0])
+        print result_file_path
         os.system("rm -rf "+result_file_path)
         cmd = 'curl -v -H "Cookie: _trackvue_session=' + request.POST['cookie'] + '"' + \
               ' --form "alert[driver_id]=' + request.POST['alert[driver_id]'] + '"' + \
@@ -84,7 +85,8 @@ def fleet_track1(request):
     import os
     if request.method == 'POST':
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        result_file_path = base_dir+'/track1_result'
+        result_file_path = base_dir+'/track1_result'+request.POST['track[driver_id]']+request.POST['track[end_time]']
+        print result_file_path
         cmd = 'curl -H "Cookie: _trackvue_session=' + request.POST['cookie'] + '"' + \
               ' --form "track[driver_id]=' + request.POST['track[driver_id]'] + '"' + \
               ' --form "track[start_time]=' + request.POST['track[start_time]'] + '"' + \
