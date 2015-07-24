@@ -81,7 +81,7 @@ def fleet_event(request):
         video_filename_without_path = str(postfix_num)+request.FILES['alert[video]'].name
         transcoding(video_filename_without_path)
 
-        result_file_path = base_dir+'/event_result'+(request.FILES['alert[video]'].name.split('.')[0])
+        result_file_path = base_dir+'/event_result'+video_filename_without_path
         print result_file_path
         os.system("rm -rf "+result_file_path)
         cmd = 'curl -v -H "Cookie: _trackvue_session=' + request.POST['cookie'] + '"' + \
