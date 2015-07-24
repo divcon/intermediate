@@ -12,6 +12,29 @@ from aws.s3interface import S3Interface
 from aws.transinterface import TransCoder
 
 
+class Singleton(object):
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+
+
+class Postfix(Singleton):
+    __postfix = 0
+
+    def __init__(self):
+        super(Postfix, self).__init__()
+
+    @property
+    def postfix(self):
+        if self.__postfix > 100:
+            self.__postfix = 0
+        self.__postfix += 1
+        return self.__postfix
+
+
 def transcoding(origin_filename):
     print "transcoding start"
     s3 = S3Interface()
@@ -48,13 +71,14 @@ def fleet_event(request):
     import os
     if request.method == 'POST':
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        video_filename = MEDIA_ROOT+'/'+request.FILES['alert[video]'].name
+        postfix_num = Postfix().postfix
+        video_filename = MEDIA_ROOT+'/'+str(postfix_num)+request.FILES['alert[video]'].name
         file_content = ContentFile(request.FILES['alert[video]'].read())
         with open(video_filename, "wb") as fp:
             for chunk in file_content.chunks():
                 fp.write(chunk)
         mp4_file_name = video_filename.split('.')[0]+'.mp4'
-        video_filename_without_path = request.FILES['alert[video]'].name
+        video_filename_without_path = str(postfix_num)+request.FILES['alert[video]'].name
         transcoding(video_filename_without_path)
 
         result_file_path = base_dir+'/event_result'+(request.FILES['alert[video]'].name.split('.')[0])
