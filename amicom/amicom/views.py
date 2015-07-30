@@ -21,24 +21,23 @@ class Singleton(object):
         return cls._instance
 
 
-class Postfix(Singleton):
-    __postfix = 0
+class AlertsPrefix(Singleton):
+    __prefix = 0
 
     def __init__(self):
-        super(Postfix, self).__init__()
+        super(AlertsPrefix, self).__init__()
 
     @property
-    def postfix(self):
-        if self.__postfix > 100:
-            self.__postfix = 0
-        self.__postfix += 1
-        return self.__postfix
+    def prefix(self):
+        if self.__prefix > 100:
+            self.__prefix = 0
+        self.__prefix += 1
+        return self.__prefix
 
 
 def transcoding(origin_filename):
     print "transcoding start"
     s3 = S3Interface()
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     filename = origin_filename.split('.')[0]
     print "upload : " + filename
     s3.upload(MEDIA_ROOT, filename)
@@ -48,6 +47,16 @@ def transcoding(origin_filename):
     print "download : " + filename
     s3.download(MEDIA_ROOT, filename)
     print "complete transcoding"
+
+
+def delete_local_media_file(origin_filename):
+    upload_file_path = origin_filename + ".avi"
+    download_file_path = origin_filename + ".mp4"
+    print "delete local media file : " + upload_file_path + ", " + download_file_path
+    if os.path.exists(upload_file_path):
+            os.remove(upload_file_path)
+    if os.path.exists(download_file_path):
+            os.remove(download_file_path)
 
 
 @csrf_exempt
@@ -71,14 +80,14 @@ def fleet_event(request):
     import os
     if request.method == 'POST':
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        postfix_num = Postfix().postfix
-        video_filename = MEDIA_ROOT+'/'+str(postfix_num)+request.FILES['alert[video]'].name
+        prefix_num = AlertsPrefix().prefix
+        video_filename = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['alert[video]'].name
         file_content = ContentFile(request.FILES['alert[video]'].read())
         with open(video_filename, "wb") as fp:
             for chunk in file_content.chunks():
                 fp.write(chunk)
         mp4_file_name = video_filename.split('.')[0]+'.mp4'
-        video_filename_without_path = str(postfix_num)+request.FILES['alert[video]'].name
+        video_filename_without_path = str(prefix_num)+request.FILES['alert[video]'].name
         transcoding(video_filename_without_path)
 
         result_file_path = base_dir+'/event_result'+video_filename_without_path
@@ -97,11 +106,27 @@ def fleet_event(request):
               'http://104.236.199.54/alerts.json >> ' + result_file_path
         os.system(cmd)
         print "event command : " + cmd
-        result_file = open(result_file_path)
-        data = result_file.readlines()
-        result_file.close()
-        os.system("rm -rf "+result_file_path)
+        with open(result_file_path) as result_file:
+            data = result_file.readlines()
+        if os.path.exists(result_file_path):
+            os.remove(result_file_path)
+
+        delete_local_media_file(video_filename.split('.')[0])
         return HttpResponse(data)
+
+
+class TrackPrefix(Singleton):
+    __prefix = 0
+
+    def __init__(self):
+        super(TrackPrefix, self).__init__()
+
+    @property
+    def prefix(self):
+        if self.__prefix > 100:
+            self.__prefix = 0
+        self.__prefix += 1
+        return self.__prefix
 
 
 @csrf_exempt
@@ -109,7 +134,8 @@ def fleet_track1(request):
     import os
     if request.method == 'POST':
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        result_file_path = base_dir+'/track1_result'+request.POST['track[driver_id]']+request.POST['track[end_time]']
+        prefix_num = TrackPrefix().prefix
+        result_file_path = base_dir+'/'+str(prefix_num)+'track1_result'
         print result_file_path
         cmd = 'curl -H "Cookie: _trackvue_session=' + request.POST['cookie'] + '"' + \
               ' --form "track[driver_id]=' + request.POST['track[driver_id]'] + '"' + \
@@ -134,10 +160,10 @@ def fleet_track1(request):
               ' http://104.236.199.54/tracks.json >> ' + result_file_path
         os.system(cmd)
         print "track command : " + cmd
-        result_file = open(result_file_path)
-        data = result_file.readlines()
-        result_file.close()
-        os.system("rm -rf "+result_file_path)
+        with open(result_file_path) as result_file:
+            data = result_file.readlines()
+        if os.path.exists(result_file_path):
+            os.remove(result_file_path)
         return HttpResponse(data)
 
 
