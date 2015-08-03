@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals, absolute_import
 import os
+from django.utils.datastructures import MultiValueDictKeyError
 
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
@@ -135,18 +136,26 @@ def fleet_track1(request):
     if request.method == 'POST':
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         prefix_num = TrackPrefix().prefix
-        rear_img = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['track[rear_img]'].name
-        rear_file_content = ContentFile(request.FILES['track[rear_img]'].read())
-        with open(rear_img, "wb") as fp:
-            for chunk in rear_file_content.chunks():
-                fp.write(chunk)
-        front_img = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['track[front_img]'].name
-        front_file_content = ContentFile(request.FILES['track[front_img]'].read())
-        with open(front_img, "wb") as fp:
-            for chunk in front_file_content.chunks():
-                fp.write(chunk)
+        rear_img = None
+        front_img = None
+        try:
+            rear_img = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['track[rear_img]'].name
+            rear_file_content = ContentFile(request.FILES['track[rear_img]'].read())
+            with open(rear_img, "wb") as fp:
+                for chunk in rear_file_content.chunks():
+                    fp.write(chunk)
+            front_img = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['track[front_img]'].name
+            front_file_content = ContentFile(request.FILES['track[front_img]'].read())
+            with open(front_img, "wb") as fp:
+                for chunk in front_file_content.chunks():
+                    fp.write(chunk)
+            image_cmd_string = ' --form "track[rear_img]=@' + rear_img + ';type=image/jpeg" ' + \
+                               ' --form "track[front_img]=@' + front_img + ';type=image/jpeg" '
+        except MultiValueDictKeyError as e:
+            image_cmd_string = ''
         result_file_path = base_dir+'/'+str(prefix_num)+'track1_result'
         print result_file_path
+
         # --form 'track[front_img]=@$FRONT_JPEG;type=image/jpeg' --form 'track[rear_img]=@$REAR_JPEG;type=image/jpeg'
         cmd = 'curl -H "Cookie: _trackvue_session=' + request.POST['cookie'] + '"' + \
               ' --form "track[driver_id]=' + request.POST['track[driver_id]'] + '"' + \
@@ -168,8 +177,7 @@ def fleet_track1(request):
               ' --form "track[count_normal]=' + request.POST['track[count_normal]'] + '"' + \
               ' --form "track[count_fast]=' + request.POST['track[count_fast]'] + '"' + \
               ' --form "track[count_speeding]=' + request.POST['track[count_speeding]'] + '"' + \
-              ' --form "track[rear_img]=@' + rear_img + ';type=image/jpeg" ' + \
-              ' --form "track[front_img]=@' + front_img + ';type=image/jpeg" ' + \
+              image_cmd_string + \
               ' http://104.236.199.54/tracks.json >> ' + result_file_path
         os.system(cmd)
         print "track command : " + cmd
@@ -177,8 +185,9 @@ def fleet_track1(request):
             data = result_file.readlines()
         if os.path.exists(result_file_path):
             os.remove(result_file_path)
-        delete_file(rear_img)
-        delete_file(front_img)
+        if image_cmd_string != '':
+            delete_file(rear_img)
+            delete_file(front_img)
         return HttpResponse(data)
 
 

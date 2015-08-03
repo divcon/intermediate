@@ -99,3 +99,6 @@ else
 fi
 
 exit 0
+
+
+curl -H "Cookie: _trackvue_session=%3D%3D--235e7b3569e075f84e22517a6d37433b52647f02" --form "track[driver_id]=9" --form "track[start_time]=1999-12-31T15:24:45.000Z" --form "track[end_time]=2015-03-11T03:19:12.000Z" --form "track[speed]=0" --form "track[speed_max]=0" --form "track[speed_avg]=0" --form "track[status]=S" --form "track[from_lat]=40.758667" --form "track[from_lng]=-73.90303" --form "track[to_lat]=40.758667" --form "track[to_lng]=73.90303" --form "track[elapsed]=0" --form "track[distance]=0" --form "track[count_off]=0" --form "track[count_idle]=1" --form "track[count_slow]=0" --form "track[count_normal]=1" --form "track[count_fast]=0" --form "track[count_speeding]=2015-07-19T18:20:33.000Z" --form "track[rear_img]=@/Users/sungjin/ProjectRoot/amicom/src/amicom/media/220150212_161359_EVT1.jpg;type=image/jpeg"  --form "track[front_img]=@/Users/sungjin/ProjectRoot/amicom/src/amicom/media/220150212_161359_EVT2.jpg;type=image/jpeg"  http://104.236.199.54/tracks.json >> /Users/sungjin/ProjectRoot/amicom/src/amicom/2track1_result
