@@ -88,7 +88,20 @@ def fleet_event(request):
             for chunk in file_content.chunks():
                 fp.write(chunk)
         mp4_file_name = video_filename.split('.')[0]+'.mp4'
-        video_filename_without_path = str(prefix_num)+request.FILES['alert[video]'].name
+        audio_file_content = ContentFile(request.FILES['alert[audio]'].read())
+        audio_filename = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['alert[audio]'].name
+        with open(audio_filename, "wb") as fp:
+            for chunk in audio_file_content.chunks():
+                fp.write(chunk)
+
+        audio_convert_file_name = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['alert[audio]'].name.split('.')[0]+'.wav'
+        encoded_file_name = MEDIA_ROOT+'/'+"new"+str(prefix_num)+request.FILES['alert[video]'].name
+        video_filename_without_path = "new"+str(prefix_num)+request.FILES['alert[video]'].name
+
+        os.system('sox -t ul -U -r 16000 -c 1 ' + audio_filename + ' ' + audio_convert_file_name)
+        os.system('avconv -i ' + audio_convert_file_name + ' -i ' + video_filename + ' -acodec copy -vcodec copy ' +
+                  encoded_file_name)
+
         transcoding(video_filename_without_path)
 
         result_file_path = base_dir+'/event_result'+video_filename_without_path
