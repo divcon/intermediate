@@ -102,6 +102,9 @@ def fleet_event(request):
                          ' -acodec copy -vcodec copy ' + encoded_file_name
         os.system(sox_command)
         os.system(avconv_command)
+        print "sox, avconv commands"
+        print sox_command
+        print avconv_command
 
         transcoding(video_filename_without_path)
 
