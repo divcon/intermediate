@@ -97,10 +97,11 @@ def fleet_event(request):
         audio_convert_file_name = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['alert[audio]'].name.split('.')[0]+'.wav'
         encoded_file_name = MEDIA_ROOT+'/'+"new"+str(prefix_num)+request.FILES['alert[video]'].name
         video_filename_without_path = "new"+str(prefix_num)+request.FILES['alert[video]'].name
-
-        os.system('sox -t ul -U -r 16000 -c 1 ' + audio_filename + ' ' + audio_convert_file_name)
-        os.system('avconv -i ' + audio_convert_file_name + ' -i ' + video_filename + ' -acodec copy -vcodec copy ' +
-                  encoded_file_name)
+        sox_command = 'sox -t ul -U -r 16000 -c 1 ' + audio_filename + ' ' + audio_convert_file_name
+        avconv_command = 'avconv -i ' + audio_convert_file_name + ' -i ' + video_filename + \
+                         ' -acodec copy -vcodec copy ' + encoded_file_name
+        os.system(sox_command)
+        os.system(avconv_command)
 
         transcoding(video_filename_without_path)
 
