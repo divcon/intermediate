@@ -87,7 +87,6 @@ def fleet_event(request):
         with open(video_filename, "wb") as fp:
             for chunk in file_content.chunks():
                 fp.write(chunk)
-        mp4_file_name = video_filename.split('.')[0]+'.mp4'
         audio_file_content = ContentFile(request.FILES['alert[audio]'].read())
         audio_filename = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['alert[audio]'].name
         with open(audio_filename, "wb") as fp:
@@ -96,6 +95,7 @@ def fleet_event(request):
 
         audio_convert_file_name = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['alert[audio]'].name.split('.')[0]+'.wav'
         encoded_file_name = MEDIA_ROOT+'/'+"new"+str(prefix_num)+request.FILES['alert[video]'].name
+        mp4_file_name = encoded_file_name.split('.')[0]+'.mp4'
         video_filename_without_path = "new"+str(prefix_num)+request.FILES['alert[video]'].name
         sox_command = 'sox -t ul -U -r 16000 -c 1 ' + audio_filename + ' ' + audio_convert_file_name
         avconv_command = 'avconv -i ' + audio_convert_file_name + ' -i ' + video_filename + \
