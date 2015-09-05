@@ -159,15 +159,17 @@ def combine_video(video_param, audio_param, prefix_num, request):
     audio_convert_file_name = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES[audio_param].name.split('.')[0]+'.wav'
     encoded_file_name = MEDIA_ROOT+'/'+"new"+str(prefix_num)+request.FILES[video_param].name
     mp4_file_name = encoded_file_name.split('.')[0]+'.mp4'
-    video_filename_without_path = "new"+str(prefix_num)+request.FILES[video_param].name
-    sox_command = 'sox -t ul -U -r 16000 -c 1 ' + audio_filename + ' ' + audio_convert_file_name
-    avconv_command = 'avconv -i ' + audio_convert_file_name + ' -i ' + video_filename + \
-                     ' -acodec copy -vcodec copy ' + encoded_file_name
-    print "sox, avconv commands"
-    print sox_command
-    os.system(sox_command)
-    print avconv_command
-    os.system(avconv_command)
+    video_filename_without_path = str(prefix_num)+request.FILES[video_param].name
+    print video_filename_without_path
+    # video_filename_without_path = "new"+str(prefix_num)+request.FILES[video_param].name
+    # sox_command = 'sox -t ul -U -r 16000 -c 1 ' + audio_filename + ' ' + audio_convert_file_name
+    # avconv_command = 'avconv -i ' + audio_convert_file_name + ' -i ' + video_filename + \
+    #                  ' -acodec copy -vcodec copy ' + encoded_file_name
+    # print "sox, avconv commands"
+    # print sox_command
+    # os.system(sox_command)
+    # print avconv_command
+    # os.system(avconv_command)
 
     transcoding(video_filename_without_path)
 
