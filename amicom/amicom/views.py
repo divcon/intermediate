@@ -82,33 +82,41 @@ def fleet_event(request):
     if request.method == 'POST':
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         prefix_num = AlertsPrefix().prefix
-        video_filename = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['alert[video]'].name
-        file_content = ContentFile(request.FILES['alert[video]'].read())
-        with open(video_filename, "wb") as fp:
-            for chunk in file_content.chunks():
-                fp.write(chunk)
-        audio_file_content = ContentFile(request.FILES['alert[audio]'].read())
-        audio_filename = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['alert[audio]'].name
-        with open(audio_filename, "wb") as fp:
-            for chunk in audio_file_content.chunks():
-                fp.write(chunk)
+        # video_filename = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['alert[video]'].name
+        # file_content = ContentFile(request.FILES['alert[video]'].read())
+        # with open(video_filename, "wb") as fp:
+        #     for chunk in file_content.chunks():
+        #         fp.write(chunk)
+        # audio_file_content = ContentFile(request.FILES['alert[audio]'].read())
+        # audio_filename = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['alert[audio]'].name
+        # with open(audio_filename, "wb") as fp:
+        #     for chunk in audio_file_content.chunks():
+        #         fp.write(chunk)
+        #
+        # audio_convert_file_name = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['alert[audio]'].name.split('.')[0]+'.wav'
+        # encoded_file_name = MEDIA_ROOT+'/'+"new"+str(prefix_num)+request.FILES['alert[video]'].name
+        # mp4_file_name = encoded_file_name.split('.')[0]+'.mp4'
+        # video_filename_without_path = "new"+str(prefix_num)+request.FILES['alert[video]'].name
+        # sox_command = 'sox -t ul -U -r 16000 -c 1 ' + audio_filename + ' ' + audio_convert_file_name
+        # avconv_command = 'avconv -i ' + audio_convert_file_name + ' -i ' + video_filename + \
+        #                  ' -acodec copy -vcodec copy ' + encoded_file_name
+        # print "sox, avconv commands"
+        # print sox_command
+        # os.system(sox_command)
+        # print avconv_command
+        # os.system(avconv_command)
+        #
+        # transcoding(video_filename_without_path)
+        filename_list = list()
+        mp4_list = list()
+        for i in range(1, 5):
+            video_param = 'alert[video'+str(i)+']'
+            audio_param = 'alert[audio'+str(i)+']'
+            mp4, filename = combine_video(video_param, audio_param, prefix_num, request)
+            mp4_list.append(mp4)
+            filename_list.append(filename)
 
-        audio_convert_file_name = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES['alert[audio]'].name.split('.')[0]+'.wav'
-        encoded_file_name = MEDIA_ROOT+'/'+"new"+str(prefix_num)+request.FILES['alert[video]'].name
-        mp4_file_name = encoded_file_name.split('.')[0]+'.mp4'
-        video_filename_without_path = "new"+str(prefix_num)+request.FILES['alert[video]'].name
-        sox_command = 'sox -t ul -U -r 16000 -c 1 ' + audio_filename + ' ' + audio_convert_file_name
-        avconv_command = 'avconv -i ' + audio_convert_file_name + ' -i ' + video_filename + \
-                         ' -acodec copy -vcodec copy ' + encoded_file_name
-        print "sox, avconv commands"
-        print sox_command
-        os.system(sox_command)
-        print avconv_command
-        os.system(avconv_command)
-
-        transcoding(video_filename_without_path)
-
-        result_file_path = base_dir+'/event_result'+video_filename_without_path
+        result_file_path = base_dir+'/event_result'+filename_list[0]
         print result_file_path
         os.system("rm -rf "+result_file_path)
         cmd = 'curl -v -H "Cookie: _trackvue_session=' + request.POST['cookie'] + '"' + \
@@ -120,7 +128,10 @@ def fleet_event(request):
               ' --form "alert[value]=' + request.POST['alert[value]'] + '"' + \
               ' --form "alert[lat]=' + request.POST['alert[lat]'] + '"' + \
               ' --form "alert[lng]=' + request.POST['alert[lng]'] + '"' + \
-              ' --form "alert[video]=@' + mp4_file_name + ';type=video/mp4" ' + \
+              ' --form "alert[video1]=@' + mp4_list[0] + ';type=video/mp4" ' + \
+              ' --form "alert[video2]=@' + mp4_list[1] + ';type=video/mp4" ' + \
+              ' --form "alert[video3]=@' + mp4_list[2] + ';type=video/mp4" ' + \
+              ' --form "alert[video4]=@' + mp4_list[3] + ';type=video/mp4" ' + \
               'http://104.236.199.54/alerts.json >> ' + result_file_path
         os.system(cmd)
         print "event command : " + cmd
@@ -129,8 +140,38 @@ def fleet_event(request):
         if os.path.exists(result_file_path):
             os.remove(result_file_path)
 
-        delete_local_media_file(video_filename.split('.')[0])
+        # delete_local_media_file(video_filename.split('.')[0])
         return HttpResponse(data)
+
+
+def combine_video(video_param, audio_param, prefix_num, request):
+    video_filename = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES[video_param].name
+    file_content = ContentFile(request.FILES[video_param].read())
+    with open(video_filename, "wb") as fp:
+        for chunk in file_content.chunks():
+            fp.write(chunk)
+    audio_file_content = ContentFile(request.FILES[audio_param].read())
+    audio_filename = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES[audio_param].name
+    with open(audio_filename, "wb") as fp:
+        for chunk in audio_file_content.chunks():
+            fp.write(chunk)
+
+    audio_convert_file_name = MEDIA_ROOT+'/'+str(prefix_num)+request.FILES[audio_param].name.split('.')[0]+'.wav'
+    encoded_file_name = MEDIA_ROOT+'/'+"new"+str(prefix_num)+request.FILES[video_param].name
+    mp4_file_name = encoded_file_name.split('.')[0]+'.mp4'
+    video_filename_without_path = "new"+str(prefix_num)+request.FILES[video_param].name
+    sox_command = 'sox -t ul -U -r 16000 -c 1 ' + audio_filename + ' ' + audio_convert_file_name
+    avconv_command = 'avconv -i ' + audio_convert_file_name + ' -i ' + video_filename + \
+                     ' -acodec copy -vcodec copy ' + encoded_file_name
+    print "sox, avconv commands"
+    print sox_command
+    os.system(sox_command)
+    print avconv_command
+    os.system(avconv_command)
+
+    transcoding(video_filename_without_path)
+
+    return mp4_file_name, video_filename_without_path
 
 
 class TrackPrefix(Singleton):
