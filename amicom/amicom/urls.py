@@ -24,5 +24,6 @@ urlpatterns = [
     url(r'^test', views.test, name='index'),
     url(r'^signin', views.signin, name='signin'),
     url(r'^alerts.json', views.fleet_event, name='signin'),
+    url(r'^backup.alerts.json', views.fleet_event_backup, name='fleet_event_backup'),
     url(r'^tracks.json', views.fleet_track1, name='signin'),
 ]
