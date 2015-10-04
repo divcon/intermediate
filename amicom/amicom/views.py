@@ -189,9 +189,9 @@ def combine_video(video_param, audio_param, prefix_num, request):
 
     transcoding(video_filename_without_path)
     if os.path.exists(audio_filename):
-            os.remove(audio_filename)
+        os.remove(audio_filename)
     if os.path.exists(video_filename):
-            os.remove(video_filename)
+        os.remove(video_filename)
     return mp4_file_name, video_filename_without_path
 
 
